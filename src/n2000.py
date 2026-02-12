@@ -1,9 +1,13 @@
 """Traitements de filtrage/export Natura 2000."""
 
+from __future__ import annotations
+
 # pylint: disable=duplicate-code
 
-from typing import List, Sequence
-import pandas as pd
+from typing import List, Sequence, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 from src.outils_communs import LocalINPNPaths, ensure_exists
 
@@ -38,6 +42,8 @@ def parse_codes_n2000(raw: str) -> List[str]:
 
 def load_n2000_info(paths: LocalINPNPaths) -> pd.DataFrame:
     """Charge les informations générales N2000 et normalise les colonnes utiles."""
+    import pandas as pd
+
     ensure_exists(paths.n2000_infos_generales)
 
     infos = pd.read_parquet(
@@ -67,6 +73,8 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
     Croise avec HABREF_70 sur cd_hab pour ajouter LB_HAB_FR.
     Croise avec N2000_Infos_generales pour ajouter site_name et type.
     """
+    import pandas as pd
+
     final_cols = [
         "ID N2000",
         "Nom site",
@@ -146,6 +154,8 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     jointure avec TAXREF pour récupérer LB_NOM,
     jointure avec N2000_Infos_generales pour ajouter site_name et type.
     """
+    import pandas as pd
+
     final_cols = [
         "ID N2000",
         "Nom site",

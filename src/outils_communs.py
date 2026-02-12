@@ -1,10 +1,13 @@
 """Utilitaires partagés (chemins, lecture parquet, export Excel)."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
-import pandas as pd
-from openpyxl import load_workbook
+from typing import Sequence, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass(frozen=True)
@@ -57,6 +60,7 @@ def filter_parquet(
     Lit uniquement keep_cols depuis le parquet, puis filtre key_col ∈ codes.
     """
     ensure_exists(parquet_file)
+    import pandas as pd
 
     try:
         df = pd.read_parquet(parquet_file, columns=list(keep_cols))
@@ -89,6 +93,8 @@ def write_excel_output(
 
     Ajuste ensuite automatiquement la largeur des colonnes.
     """
+    import pandas as pd
+    from openpyxl import load_workbook
 
     znieff_habitats_cols = [
         "ID ZNIEFF",

@@ -1,9 +1,13 @@
 """Traitements de filtrage/export ZNIEFF."""
 
+from __future__ import annotations
+
 # pylint: disable=duplicate-code
 
-from typing import List, Sequence
-import pandas as pd
+from typing import List, Sequence, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 from src.outils_communs import LocalINPNPaths, ensure_exists, filter_parquet
 
@@ -53,6 +57,8 @@ def parse_codes_znieff(raw: str) -> List[str]:
 
 def load_znieff_info(paths: LocalINPNPaths) -> pd.DataFrame:
     """Charge les informations générales des ZNIEFF."""
+    import pandas as pd
+
     ensure_exists(paths.znieff_infos_generales)
 
     zn = pd.read_parquet(paths.znieff_infos_generales, columns=["NM_SFFZN", "LB_ZN", "TY_ZONE"])
@@ -73,6 +79,8 @@ def load_znieff_info(paths: LocalINPNPaths) -> pd.DataFrame:
 def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
     # pylint: disable=too-many-locals
     """Exporte les habitats ZNIEFF filtrés par codes avec groupage et enrichissement."""
+    import pandas as pd
+
     # Schéma cible de sortie (ordre final des colonnes Excel)
     final_cols = [
         "ID ZNIEFF",
@@ -215,6 +223,8 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
 
 def export_especes_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
     """Exporte les espèces ZNIEFF filtrées par codes."""
+    import pandas as pd
+
     # Schéma cible de sortie (ordre final des colonnes Excel)
     final_cols = [
         "ID ZNIEFF",
