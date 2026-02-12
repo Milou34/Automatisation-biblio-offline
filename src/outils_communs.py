@@ -52,7 +52,13 @@ def filter_parquet(
     """
     ensure_exists(parquet_file)
 
-    df = pd.read_parquet(parquet_file, columns=list(keep_cols))
+    try:
+        df = pd.read_parquet(parquet_file, columns=list(keep_cols))
+    except ImportError as e:
+        raise ImportError(
+            "Lecture parquet impossible: aucun moteur parquet disponible. "
+            "Installez 'pyarrow' (recommandé) ou 'fastparquet', puis relancez."
+        ) from e
 
     # Robustesse: on filtre en string (parfois parquet peut typer différemment)
     df[key_col] = df[key_col].astype(str)
