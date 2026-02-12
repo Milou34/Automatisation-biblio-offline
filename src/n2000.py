@@ -56,48 +56,43 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
     Croise avec HABREF_70 sur cd_hab pour ajouter LB_HAB_FR.
     Croise avec N2000_Infos_generales pour ajouter site_name et type.
     """
+    final_cols = [
+        "ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB"
+    ]
+
+    # Sortie rapide si aucun code N2000 à traiter
+    code_set = {str(c).strip().upper() for c in codes if str(c).strip()}
+    if not code_set:
+        return pd.DataFrame(columns=final_cols)
+
     ensure_exists(paths.n2000_habitats)
-    
-    # Lire N2000_Habitats et filtrer sur sitecode
     df = pd.read_parquet(
         paths.n2000_habitats,
         columns=["sitecode", "cd_ue", "cd_hab", "pf"]
     )
-    
-    # Normaliser et filtrer
+
+    # Normaliser et filtrer sur les codes demandés
     df["sitecode"] = df["sitecode"].astype(str).str.strip().str.upper()
-    codes_upper = [str(c).upper() for c in codes]
-    code_set = set(codes_upper)
-    
     df = df[df["sitecode"].isin(code_set)]
-    
+
     if df.empty:
-        return pd.DataFrame(columns=[
-            "ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB"
-        ])
-    
-    # Normaliser cd_hab pour la jointure
-    df["cd_hab"] = df["cd_hab"].astype(str).str.strip()
-    
-    # Lire HABREF_70 et faire la jointure
+        return pd.DataFrame(columns=final_cols)
+
     ensure_exists(paths.habref_70)
     habref = pd.read_parquet(
         paths.habref_70,
         columns=["CD_HAB", "LB_HAB_FR"]
     )
-    
-    habref["CD_HAB"] = habref["CD_HAB"].astype(str).str.strip()
-    
-    # Jointure sur cd_hab
-    df = df.merge(habref, how="left", left_on="cd_hab", right_on="CD_HAB").drop(columns=["CD_HAB"])
-    
-    # Charger les infos N2000 normalisées et faire la jointure sur sitecode
-    infos = load_n2000_info(paths)
 
-    # Jointure sur sitecode
-    df = df.merge(infos, how="left", on="sitecode")
-    
-    # Renommer les colonnes pour la sortie finale
+    # Normaliser les clés de jointure
+    df["cd_hab"] = df["cd_hab"].astype(str).str.strip()
+    habref["CD_HAB"] = habref["CD_HAB"].astype(str).str.strip()
+
+    # Jointures d'enrichissement (HABREF + infos N2000)
+    df = df.merge(habref, how="left", left_on="cd_hab", right_on="CD_HAB").drop(columns=["CD_HAB"])
+    df = df.merge(load_n2000_info(paths), how="left", on="sitecode")
+
+    # Renommage métier des colonnes
     df = df.rename(columns={
         "sitecode": "ID N2000",
         "cd_ue": "Code HIC",
@@ -107,15 +102,19 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
         "site_name": "Nom site",
         "type": "Type de zone",
     })
-    
-    # Mapper Forme prioritaire : "true" -> Oui, "false" -> Non
+
+    # Mapping Forme prioritaire : true/false -> Oui/Non
     pf_map = {"true": "Oui", "false": "Non"}
-    df["Forme prioritaire"] = df["Forme prioritaire"].astype(str).str.strip().str.lower().map(pf_map).fillna(df["Forme prioritaire"])
-    
-    # Sélectionner et réordonner les colonnes
-    df = df[["ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB"]]
-    
-    return df
+    df["Forme prioritaire"] = (
+        df["Forme prioritaire"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .map(pf_map)
+        .fillna(df["Forme prioritaire"])
+    )
+
+    return df[final_cols]
 
 
 def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
@@ -125,13 +124,18 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     jointure avec TAXREF pour récupérer LB_NOM,
     jointure avec N2000_Infos_generales pour ajouter site_name et type.
     """
+    final_cols = [
+        "ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce"
+    ]
+
+    # Sortie rapide si aucun code N2000 à traiter
+    code_set = {str(c).strip().upper() for c in codes if str(c).strip()}
+    if not code_set:
+        return pd.DataFrame(columns=final_cols)
+
     ensure_exists(paths.n2000_especes_inscrites)
     ensure_exists(paths.n2000_especes_autres)
-    
-    # Normaliser les codes
-    codes_upper = [str(c).upper() for c in codes]
-    code_set = set(codes_upper)
-    
+
     # Mapping taxgroup
     taxgroup_map = {
         "A": "Amphibiens",
@@ -163,12 +167,10 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     # Normaliser et filtrer sur sitecode
     df["sitecode"] = df["sitecode"].astype(str).str.strip().str.upper()
     df = df[df["sitecode"].isin(code_set)]
-    
+
     if df.empty:
-        return pd.DataFrame(columns=[
-            "ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce"
-        ])
-    
+        return pd.DataFrame(columns=final_cols)
+
     # Normaliser les colonnes pour les jointures
     df["cd_nom"] = df["cd_nom"].astype(str).str.strip()
     df["cd_ref"] = df["cd_ref"].astype(str).str.strip()
@@ -184,13 +186,10 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     # Mapper taxgroup aux libellés
     df["taxgroup"] = df["taxgroup"].map(taxgroup_map).fillna(df["taxgroup"])
     
-    # Charger les infos N2000 normalisées et faire la jointure sur sitecode
-    infos = load_n2000_info(paths)
+    # Jointure avec les infos N2000 normalisées
+    df = df.merge(load_n2000_info(paths), how="left", on="sitecode")
 
-    # Jointure sur sitecode
-    df = df.merge(infos, how="left", on="sitecode")
-    
-    # Renommer et réorganiser les colonnes
+    # Renommage métier des colonnes
     df = df.rename(columns={
         "sitecode": "ID N2000",
         "taxgroup": "Groupe taxonomique",
@@ -198,11 +197,8 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
         "cd_ref": "CD_REF",
         "site_name": "Nom site",
         "type": "Type de zone",
+        "LB_NOM": "Nom scientifique",
     })
-    
-    # Renommer LB_NOM en "Nom scientifique" et sélectionner/réordonner les colonnes
-    df = df.rename(columns={"LB_NOM": "Nom scientifique"})
-    df = df[["ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce"]]
-    
-    return df
+
+    return df[final_cols]
 

@@ -66,6 +66,11 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
         "Code EUNIS", "Libellé EUNIS", "Code Corine", "Libellé Corine", "Code HIC", "Libellé HIC",
     ]
 
+    # Sortie rapide si aucun code ZNIEFF valide à traiter
+    code_set = {str(c).strip() for c in codes if str(c).strip()}
+    if not code_set:
+        return pd.DataFrame(columns=final_cols)
+
     df = filter_parquet(
         parquet_file=paths.znieff_habitats,
         key_col=HABITATS_KEY_COL,
@@ -184,6 +189,11 @@ def export_especes_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
         "CD_NOM",
         "Type espèce",
     ]
+
+    # Sortie rapide si aucun code ZNIEFF valide à traiter
+    code_set = {str(c).strip() for c in codes if str(c).strip()}
+    if not code_set:
+        return pd.DataFrame(columns=final_cols)
 
     df = filter_parquet(
         parquet_file=paths.znieff_espece,
