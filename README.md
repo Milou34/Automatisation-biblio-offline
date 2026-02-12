@@ -1,4 +1,4 @@
-# Automatisation-biblio
+# Automatisation bibliographie offline
 
 <a href="https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/build-executable-create-release.yml" target="_blank">![Build Status](https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/build-executable-create-release.yml/badge.svg)</a>
 <a href="https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/pylint.yml" target="_blank">![Code Quality](https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/pylint.yml/badge.svg)</a>
@@ -6,8 +6,8 @@
 
 <a href="https://www.python.org/doc" target="_blank">![Python](https://img.shields.io/badge/Python-3.12-ffd343?logo=python)</a>
 <a href="https://pypi.org/project/openpyxl" target="_blank">![Openpyxl](https://img.shields.io/badge/Openpyxl-3.1.5-ffd343?logo=pypi)</a>
-<a href="https://pypi.org/project/requests" target="_blank">![Requests](https://img.shields.io/badge/Requests-2.32.3-ffd343?logo=pypi)</a>
-<a href="https://pypi.org/project/psutil" target="_blank">![Psutil](https://img.shields.io/badge/Psutil-6.0.0-ffd343?logo=pypi)</a>
+<a href="https://pypi.org/project/pandas/" target="_blank">![Pandas](https://img.shields.io/badge/Pandas-3.0.0-ffd343?logo=pypi)</a>
+<a href="https://pypi.org/project/fastparquet/" target="_blank">![Fastparquet](https://img.shields.io/badge/Fastparquet-2025.12.0-ffd343?logo=pypi)</a>
 
 ## Bibliographie automatisée pour des études environnementales
 
@@ -26,7 +26,7 @@ Ce projet Python a pour objectif d'automatiser l'export des données espèces et
 Avant de commencer, assurez-vous de suivre les étapes suivantes :
 
 
-1. Télécharger <a href="https://github.com/Milou34/Automatisation-biblio-offline/releases/tag/v-888b2356e6ecbd58334fadaa67187b41a4499b87" target="_blank">l'executable</a> (cliquer sur le .exe)
+1. Télécharger <a href="https://github.com/Milou34/Automatisation-biblio-offline/releases/latest" target="_blank">l'executable</a> (cliquer sur le .exe)
 2. Préalablement au lancement du programme, pour le ou les projets dont vous souhaitez créer la bibliographie, assurez vous d'avoir bien créé la couche `zonages_aires_detude` à l'aide du modèle Zonages sur QGIS. Dans la table attributaire de cette couche, vous pourrez retrouver les `codes ZNIEFF et Natura 2000` demandés par le programme.
 3. Lancez l'exécutable `v...-bibliographie-zonage`.
 4. A la première exécution du programme, cliquez sur `Informations complémentaires`, puis sur `Exécuter quand même`. 
