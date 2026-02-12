@@ -63,8 +63,19 @@ def ask_output_directory() -> Path:
             print(f"Chemin invalide: {error}")
 
 
-def main() -> None:
-    """Exécute le flux de lecture, filtrage et export Excel."""
+def ask_continue() -> bool:
+    """Demande si l'utilisateur souhaite générer une autre bibliographie."""
+    while True:
+        answer = input("\nContinuer avec une autre bibliographie ? \nAppuyez sur O pour Oui ou N pour Non :\n").strip().upper()
+        if answer == "O":
+            return True
+        if answer == "N":
+            return False
+        print("Réponse invalide. Appuyez sur O pour Oui ou N pour Non.")
+
+
+def run_single_export() -> None:
+    """Exécute un flux complet de lecture, filtrage et export Excel."""
     codes_znieff, codes_n2000 = ask_codes()
     project_name = ask_project_name()
     output_dir = ask_output_directory()
@@ -110,6 +121,19 @@ def main() -> None:
     print(f"   - ESPECES ZNIEFF : {len(df_especes_znieff)} lignes")
     print(f"   - HABITATS N2000 : {len(df_habitats_n2000)} lignes")
     print(f"   - ESPECES N2000 : {len(df_especes_n2000)} lignes")
+
+
+def main() -> None:
+    """Lance le programme et propose d'enchaîner plusieurs bibliographies."""
+    is_first_run = True
+    while True:
+        if not is_first_run:
+            print("\n----- Nouvelle bibliographie -----\n")
+        run_single_export()
+        if not ask_continue():
+            print("Fin du programme.")
+            break
+        is_first_run = False
 
 if __name__ == "__main__":
     try:
