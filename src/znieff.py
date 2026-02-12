@@ -58,76 +58,6 @@ def load_znieff_info(paths: LocalINPNPaths) -> pd.DataFrame:
     return zn
 
 
-def export_especes_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
-    """Exporte les espèces ZNIEFF filtrées par codes."""
-    # Schéma cible de sortie (ordre final des colonnes Excel)
-    final_cols = [
-        "ID ZNIEFF",
-        "Nom ZNIEFF",
-        "Type ZNIEFF",
-        "Groupe taxonomique",
-        "Nom scientifique",
-        "CD_REF",
-        "CD_NOM",
-        "Type espèce",
-    ]
-
-    df = filter_parquet(
-        parquet_file=paths.znieff_espece,
-        key_col=ESPECES_KEY_COL,
-        keep_cols=ESPECES_KEEP_COLS,
-        codes=codes,
-    )
-
-    # Si aucun résultat après filtrage, on renvoie un tableau vide mais structuré
-    if df.empty:
-        return pd.DataFrame(columns=final_cols)
-
-    # TAXREF: jointure sur cd_nom -> CD_NOM pour récupérer LB_NOM
-    ensure_exists(paths.taxref)
-    tax = pd.read_parquet(paths.taxref, columns=["CD_NOM", "LB_NOM"])
-
-    df["cd_nom"] = df["cd_nom"].astype(str).str.strip()
-    df["cd_ref"] = df["cd_ref"].astype(str).str.strip()
-    df["nm_sffzn"] = df["nm_sffzn"].astype(str).str.strip()
-    tax["CD_NOM"] = tax["CD_NOM"].astype(str).str.strip()
-
-    df = df.merge(tax, how="left", left_on="cd_nom", right_on="CD_NOM").drop(columns=["CD_NOM"])
-
-    # Mapping fg_esp -> libellé
-    fg_map = {
-        "A": "Autre espèce",
-        "E": "Autre espèce à enjeux",
-        "D": "Déterminante",
-        "C": "Confidentielle",
-    }
-    df["fg_esp"] = df["fg_esp"].astype(str).str.strip().map(fg_map).fillna(df["fg_esp"])
-
-    # Renommage final des colonnes métier
-    df = df.rename(columns={
-        "nm_sffzn": "ID ZNIEFF",
-        "groupe_taxo": "Groupe taxonomique",
-        "LB_NOM": "Nom scientifique",
-        "cd_ref": "CD_REF",
-        "cd_nom": "CD_NOM",
-        "fg_esp": "Type espèce",
-    })
-
-    zn = load_znieff_info(paths)
-    df = df.merge(zn, how="left", on="ID ZNIEFF")
-
-    # Sélection stricte de la structure de sortie
-    df = df[final_cols]
-
-    # Tri lisible
-    df = df.sort_values(
-        by=["Groupe taxonomique", "Nom scientifique"],
-        kind="stable"
-    )
-
-    return df
-
-
 def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
     """Exporte les habitats ZNIEFF filtrés par codes avec groupage et enrichissement."""
     # Schéma cible de sortie (ordre final des colonnes Excel)
@@ -239,3 +169,75 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
     out_df = out_df[final_cols]
 
     return out_df
+
+
+def export_especes_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
+    """Exporte les espèces ZNIEFF filtrées par codes."""
+    # Schéma cible de sortie (ordre final des colonnes Excel)
+    final_cols = [
+        "ID ZNIEFF",
+        "Nom ZNIEFF",
+        "Type ZNIEFF",
+        "Groupe taxonomique",
+        "Nom scientifique",
+        "CD_REF",
+        "CD_NOM",
+        "Type espèce",
+    ]
+
+    df = filter_parquet(
+        parquet_file=paths.znieff_espece,
+        key_col=ESPECES_KEY_COL,
+        keep_cols=ESPECES_KEEP_COLS,
+        codes=codes,
+    )
+
+    # Si aucun résultat après filtrage, on renvoie un tableau vide mais structuré
+    if df.empty:
+        return pd.DataFrame(columns=final_cols)
+
+    # TAXREF: jointure sur cd_nom -> CD_NOM pour récupérer LB_NOM
+    ensure_exists(paths.taxref)
+    tax = pd.read_parquet(paths.taxref, columns=["CD_NOM", "LB_NOM"])
+
+    df["cd_nom"] = df["cd_nom"].astype(str).str.strip()
+    df["cd_ref"] = df["cd_ref"].astype(str).str.strip()
+    df["nm_sffzn"] = df["nm_sffzn"].astype(str).str.strip()
+    tax["CD_NOM"] = tax["CD_NOM"].astype(str).str.strip()
+
+    df = df.merge(tax, how="left", left_on="cd_nom", right_on="CD_NOM").drop(columns=["CD_NOM"])
+
+    # Mapping fg_esp -> libellé
+    fg_map = {
+        "A": "Autre espèce",
+        "E": "Autre espèce à enjeux",
+        "D": "Déterminante",
+        "C": "Confidentielle",
+    }
+    df["fg_esp"] = df["fg_esp"].astype(str).str.strip().map(fg_map).fillna(df["fg_esp"])
+
+    # Renommage final des colonnes métier
+    df = df.rename(columns={
+        "nm_sffzn": "ID ZNIEFF",
+        "groupe_taxo": "Groupe taxonomique",
+        "LB_NOM": "Nom scientifique",
+        "cd_ref": "CD_REF",
+        "cd_nom": "CD_NOM",
+        "fg_esp": "Type espèce",
+    })
+
+    zn = load_znieff_info(paths)
+    df = df.merge(zn, how="left", on="ID ZNIEFF")
+
+    # Sélection stricte de la structure de sortie
+    df = df[final_cols]
+
+    # Tri lisible
+    df = df.sort_values(
+        by=["Groupe taxonomique", "Nom scientifique"],
+        kind="stable"
+    )
+
+    return df
+
+

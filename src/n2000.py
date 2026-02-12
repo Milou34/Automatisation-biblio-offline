@@ -6,6 +6,7 @@ from .outils_communs import LocalINPNPaths, ensure_exists
 
 def parse_codes_n2000(raw: str) -> List[str]:
     """
+    Analyse et vérification des inputs de codes N2000.
     Accepte des codes Natura 2000 séparés par ; , retours ligne, tabulations.
     Format attendu : FR + 7 chiffres (ex: FR1234567).
     Dé-doublonne en conservant l'ordre.
@@ -28,6 +29,24 @@ def parse_codes_n2000(raw: str) -> List[str]:
             )
 
     return out
+
+
+def load_n2000_info(paths: LocalINPNPaths) -> pd.DataFrame:
+    """Charge les informations générales N2000 et normalise les colonnes utiles."""
+    ensure_exists(paths.n2000_infos_generales)
+
+    infos = pd.read_parquet(
+        paths.n2000_infos_generales,
+        columns=["sitecode", "site_name", "type"]
+    )
+
+    infos["sitecode"] = infos["sitecode"].astype(str).str.strip().str.upper()
+
+    # Mapper type : A -> ZPS, B -> pSIC/SIC/ZSC
+    type_map = {"A": "ZPS", "B": "pSIC/SIC/ZSC"}
+    infos["type"] = infos["type"].astype(str).str.strip().map(type_map).fillna(infos["type"])
+
+    return infos
 
 
 def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
@@ -72,19 +91,9 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
     # Jointure sur cd_hab
     df = df.merge(habref, how="left", left_on="cd_hab", right_on="CD_HAB").drop(columns=["CD_HAB"])
     
-    # Lire N2000_Infos_generales et faire la jointure sur sitecode
-    ensure_exists(paths.n2000_infos_generales)
-    infos = pd.read_parquet(
-        paths.n2000_infos_generales,
-        columns=["sitecode", "site_name", "type"]
-    )
-    
-    infos["sitecode"] = infos["sitecode"].astype(str).str.strip().str.upper()
-    
-    # Mapper type : A -> ZPS, B -> pSIC/SIC/ZSC
-    type_map = {"A": "ZPS", "B": "pSIC/SIC/ZSC"}
-    infos["type"] = infos["type"].astype(str).str.strip().map(type_map).fillna(infos["type"])
-    
+    # Charger les infos N2000 normalisées et faire la jointure sur sitecode
+    infos = load_n2000_info(paths)
+
     # Jointure sur sitecode
     df = df.merge(infos, how="left", on="sitecode")
     
@@ -175,19 +184,9 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     # Mapper taxgroup aux libellés
     df["taxgroup"] = df["taxgroup"].map(taxgroup_map).fillna(df["taxgroup"])
     
-    # Lire N2000_Infos_generales et faire la jointure sur sitecode
-    ensure_exists(paths.n2000_infos_generales)
-    infos = pd.read_parquet(
-        paths.n2000_infos_generales,
-        columns=["sitecode", "site_name", "type"]
-    )
-    
-    infos["sitecode"] = infos["sitecode"].astype(str).str.strip().str.upper()
-    
-    # Mapper type : A -> ZPS, B -> pSIC/SIC/ZSC
-    type_map = {"A": "ZPS", "B": "pSIC/SIC/ZSC"}
-    infos["type"] = infos["type"].astype(str).str.strip().map(type_map).fillna(infos["type"])
-    
+    # Charger les infos N2000 normalisées et faire la jointure sur sitecode
+    infos = load_n2000_info(paths)
+
     # Jointure sur sitecode
     df = df.merge(infos, how="left", on="sitecode")
     
