@@ -1,3 +1,7 @@
+"""Utilitaires partagés (chemins, lecture parquet, export Excel)."""
+
+# pylint: disable=import-error
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
@@ -6,7 +10,10 @@ from openpyxl import load_workbook
 
 
 @dataclass(frozen=True)
+# pylint: disable=too-many-instance-attributes
 class LocalINPNPaths:
+    """Chemins locaux des sources parquet nécessaires aux exports."""
+
     znieff_espece: Path
     znieff_habitats: Path
     znieff_habitats_info: Path
@@ -20,6 +27,7 @@ class LocalINPNPaths:
 
     @staticmethod
     def default(data_dir: Path | str = "data") -> "LocalINPNPaths":
+        """Construit les chemins standards à partir du dossier de données."""
         pdir = Path(data_dir)
         return LocalINPNPaths(
             znieff_espece=pdir / "ZNIEFF_Especes.parquet",
@@ -78,20 +86,55 @@ def write_excel_output(
     sheet_habitats_n2000: str = "Habitats N2000",
     sheet_especes_n2000: str = "Espèces N2000",
 ) -> Path:
-    """Écrit les dataframes (même vides) dans un fichier Excel avec plusieurs onglets et ajuste la largeur des colonnes."""
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    """Écrit les dataframes (même vides) dans un Excel multi-onglets.
+
+    Ajuste ensuite automatiquement la largeur des colonnes.
+    """
 
     znieff_habitats_cols = [
-        "ID ZNIEFF", "Nom ZNIEFF", "Type ZNIEFF", "Type habitat", "CD_HAB", "Code typologie", "Libellé typologie",
-        "Code EUNIS", "Libellé EUNIS", "Code Corine", "Libellé Corine", "Code HIC", "Libellé HIC",
+        "ID ZNIEFF",
+        "Nom ZNIEFF",
+        "Type ZNIEFF",
+        "Type habitat",
+        "CD_HAB",
+        "Code typologie",
+        "Libellé typologie",
+        "Code EUNIS",
+        "Libellé EUNIS",
+        "Code Corine",
+        "Libellé Corine",
+        "Code HIC",
+        "Libellé HIC",
     ]
     znieff_especes_cols = [
-        "ID ZNIEFF", "Nom ZNIEFF", "Type ZNIEFF", "Groupe taxonomique", "Nom scientifique", "CD_REF", "CD_NOM", "Type espèce",
+        "ID ZNIEFF",
+        "Nom ZNIEFF",
+        "Type ZNIEFF",
+        "Groupe taxonomique",
+        "Nom scientifique",
+        "CD_REF",
+        "CD_NOM",
+        "Type espèce",
     ]
     n2000_habitats_cols = [
-        "ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB",
+        "ID N2000",
+        "Nom site",
+        "Type de zone",
+        "Code HIC",
+        "Libellé HIC",
+        "Forme prioritaire",
+        "CD_HAB",
     ]
     n2000_especes_cols = [
-        "ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce",
+        "ID N2000",
+        "Nom site",
+        "Type de zone",
+        "Groupe taxonomique",
+        "Nom scientifique",
+        "CD_NOM",
+        "CD_REF",
+        "Type espèce",
     ]
 
     def ensure_headers(df: pd.DataFrame | None, expected_cols: list[str]) -> pd.DataFrame:
@@ -116,7 +159,7 @@ def write_excel_output(
     df_especes_znieff = ensure_headers(df_especes_znieff, znieff_especes_cols)
     df_habitats_n2000 = ensure_headers(df_habitats_n2000, n2000_habitats_cols)
     df_especes_n2000 = ensure_headers(df_especes_n2000, n2000_especes_cols)
-    
+
     out_xlsx.parent.mkdir(parents=True, exist_ok=True)
 
     with pd.ExcelWriter(out_xlsx, engine="openpyxl") as writer:
@@ -127,25 +170,24 @@ def write_excel_output(
 
     # Charger le workbook avec openpyxl et ajuster les largeurs de colonnes
     wb = load_workbook(out_xlsx)
-    
+
     for sheet in wb.sheetnames:
         ws = wb[sheet]
         for column in ws.columns:
             max_length = 0
             column_letter = column[0].column_letter
-            
+
             for cell in column:
                 try:
                     if cell.value:
                         cell_length = len(str(cell.value))
-                        if cell_length > max_length:
-                            max_length = cell_length
-                except:
+                        max_length = max(max_length, cell_length)
+                except (TypeError, ValueError):
                     pass
-            
+
             # Ajouter un peu de padding et appliquer une largeur min/max raisonnable
             adjusted_width = min(50, max(12, max_length + 2))
             ws.column_dimensions[column_letter].width = adjusted_width
-    
+
     wb.save(out_xlsx)
     return out_xlsx

@@ -1,7 +1,11 @@
+"""Traitements de filtrage/export ZNIEFF."""
+
+# pylint: disable=import-error
+
 from typing import List, Sequence
 import pandas as pd
 
-from .outils_communs import LocalINPNPaths, filter_parquet, ensure_exists
+from src.outils_communs import LocalINPNPaths, ensure_exists, filter_parquet
 
 
 # Constantes ZNIEFF
@@ -9,7 +13,15 @@ ESPECES_KEY_COL = "nm_sffzn"
 HABITATS_KEY_COL = "NM_SFFZN"
 
 ESPECES_KEEP_COLS = ["nm_sffzn", "cd_ref", "cd_nom", "fg_esp", "groupe_taxo"]
-HABITATS_KEEP_COLS = ["NM_SFFZN", "CD_TYPO", "LB_TYPO", "CD_HAB", "LB_CODE", "LB_HAB", "ID_TYPO_INFO"]
+HABITATS_KEEP_COLS = [
+    "NM_SFFZN",
+    "CD_TYPO",
+    "LB_TYPO",
+    "CD_HAB",
+    "LB_CODE",
+    "LB_HAB",
+    "ID_TYPO_INFO",
+]
 
 
 def parse_codes_znieff(raw: str) -> List[str]:
@@ -91,11 +103,14 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
     fg_map = {"A": "Autre habitat", "D": "Déterminant", "P": "Périphérique"}
     if hasattr(paths, "znieff_habitats_info") and paths.znieff_habitats_info.exists():
         try:
-            typo_info = pd.read_parquet(paths.znieff_habitats_info, columns=["ID_TYPO_INFO", "FG_TYPO"])
+            typo_info = pd.read_parquet(
+                paths.znieff_habitats_info,
+                columns=["ID_TYPO_INFO", "FG_TYPO"],
+            )
             typo_info["ID_TYPO_INFO"] = typo_info["ID_TYPO_INFO"].astype(str).str.strip()
             typo_info["FG_TYPO"] = typo_info["FG_TYPO"].astype(str).str.strip()
             fg_lookup = dict(zip(typo_info["ID_TYPO_INFO"], typo_info["FG_TYPO"]))
-        except Exception:
+        except (OSError, ValueError, KeyError):
             fg_lookup = {}
     else:
         fg_lookup = {}
@@ -158,7 +173,9 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
 
     # Mapping du type habitat à partir de l'identifiant de typologie
     out_df = out_df.rename(columns={"NM_SFFZN": "ID ZNIEFF"})
-    out_df["Type habitat"] = out_df["ID_TYPO_INFO"].map(lambda value: fg_map.get(fg_lookup.get(str(value), ""), ""))
+    out_df["Type habitat"] = out_df["ID_TYPO_INFO"].map(
+        lambda value: fg_map.get(fg_lookup.get(str(value), ""), "")
+    )
 
     # Charger les infos ZNIEFF (nom, type) et faire la jointure
     znieff_info = load_znieff_info(paths)

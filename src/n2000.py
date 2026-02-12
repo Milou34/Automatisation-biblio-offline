@@ -1,7 +1,11 @@
+"""Traitements de filtrage/export Natura 2000."""
+
+# pylint: disable=import-error
+
 from typing import List, Sequence
 import pandas as pd
 
-from .outils_communs import LocalINPNPaths, ensure_exists
+from src.outils_communs import LocalINPNPaths, ensure_exists
 
 
 def parse_codes_n2000(raw: str) -> List[str]:
@@ -44,7 +48,13 @@ def load_n2000_info(paths: LocalINPNPaths) -> pd.DataFrame:
 
     # Mapper type : A -> ZPS, B -> pSIC/SIC/ZSC
     type_map = {"A": "ZPS", "B": "pSIC/SIC/ZSC"}
-    infos["type"] = infos["type"].astype(str).str.strip().map(type_map).fillna(infos["type"])
+    infos["type"] = (
+        infos["type"]
+        .astype(str)
+        .str.strip()
+        .map(type_map)
+        .fillna(infos["type"])
+    )
 
     return infos
 
@@ -57,7 +67,13 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
     Croise avec N2000_Infos_generales pour ajouter site_name et type.
     """
     final_cols = [
-        "ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB"
+        "ID N2000",
+        "Nom site",
+        "Type de zone",
+        "Code HIC",
+        "Libellé HIC",
+        "Forme prioritaire",
+        "CD_HAB",
     ]
 
     # Sortie rapide si aucun code N2000 à traiter
@@ -89,7 +105,12 @@ def export_habitats_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Dat
     habref["CD_HAB"] = habref["CD_HAB"].astype(str).str.strip()
 
     # Jointures d'enrichissement (HABREF + infos N2000)
-    df = df.merge(habref, how="left", left_on="cd_hab", right_on="CD_HAB").drop(columns=["CD_HAB"])
+    df = df.merge(
+        habref,
+        how="left",
+        left_on="cd_hab",
+        right_on="CD_HAB",
+    ).drop(columns=["CD_HAB"])
     df = df.merge(load_n2000_info(paths), how="left", on="sitecode")
 
     # Renommage métier des colonnes
@@ -125,7 +146,14 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     jointure avec N2000_Infos_generales pour ajouter site_name et type.
     """
     final_cols = [
-        "ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce"
+        "ID N2000",
+        "Nom site",
+        "Type de zone",
+        "Groupe taxonomique",
+        "Nom scientifique",
+        "CD_NOM",
+        "CD_REF",
+        "Type espèce",
     ]
 
     # Sortie rapide si aucun code N2000 à traiter

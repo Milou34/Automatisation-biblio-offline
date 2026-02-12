@@ -1,83 +1,76 @@
+"""Point d'entrée du script d'export biodiversité (ZNIEFF / Natura 2000)."""
+
 from __future__ import annotations
 
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 import re
 
-from src.outils_communs import (
-    LocalINPNPaths,
-    write_excel_output,
-)
-from src.znieff import (
-    parse_codes_znieff,
-    export_especes_znieff,
-    export_habitats_znieff,
-)
-from src.n2000 import (
-    parse_codes_n2000,
-    export_habitats_n2000,
-    export_especes_n2000,
-)
+from src.n2000 import export_especes_n2000, export_habitats_n2000, parse_codes_n2000
+from src.outils_communs import LocalINPNPaths, write_excel_output
+from src.znieff import export_especes_znieff, export_habitats_znieff, parse_codes_znieff
 
 
-
-def main():
-
-#Input ZNIEFF + N2000
-
+def ask_codes() -> tuple[list[str], list[str]]:
+    """Demande et valide les codes ZNIEFF/N2000 jusqu'à obtenir au moins un code."""
     while True:
         while True:
             raw_znieff = input("Codes ZNIEFF séparés par ; ou , :\n")
             try:
                 codes_znieff = parse_codes_znieff(raw_znieff)
                 break
-            except ValueError as e:
-                print(f"Erreur: {e}")
+            except ValueError as error:
+                print(f"Erreur: {error}")
 
         while True:
             raw_n2000 = input("Codes Natura 2000 séparés par ; ou , :\n")
             try:
                 codes_n2000 = parse_codes_n2000(raw_n2000)
                 break
-            except ValueError as e:
-                print(f"Erreur: {e}")
+            except ValueError as error:
+                print(f"Erreur: {error}")
 
-        if not codes_znieff and not codes_n2000:
-            print("Aucun code ZNIEFF ou N2000 fourni. Merci de saisir au moins un code.")
-            continue
+        if codes_znieff or codes_n2000:
+            return codes_znieff, codes_n2000
 
-        break
-    
-#Input nom du projet
+        print("Aucun code ZNIEFF ou N2000 fourni. Merci de saisir au moins un code.")
 
-    nom_projet = input("Nom du projet :\n").strip()
-    if not nom_projet:
-        nom_projet = "SansNom"
-    nom_projet = re.sub(r'[\\/:*?"<>|]+', "_", nom_projet)
 
-#Input dossier de sortie et vérification de validité
+def ask_project_name() -> str:
+    """Demande un nom de projet et le normalise pour un nom de fichier Windows."""
+    project_name = input("Nom du projet :\n").strip()
+    if not project_name:
+        project_name = "SansNom"
+    return re.sub(r'[\\/:*?"<>|]+', "_", project_name)
 
-    out_dir = None
-    while out_dir is None:
-        out_dir_input = input("Chemin où créer l'Excel final :\n").strip().strip('"')
-        if not out_dir_input:
+
+def ask_output_directory() -> Path:
+    """Demande un dossier de sortie valide (obligatoire) et le crée si nécessaire."""
+    while True:
+        output_dir_input = input("Chemin où créer l'Excel final :\n").strip().strip('"')
+        if not output_dir_input:
             print("Le chemin est obligatoire.")
             continue
 
-        candidate = Path(out_dir_input)
+        candidate = Path(output_dir_input)
         try:
             if candidate.exists() and not candidate.is_dir():
                 print(f"Chemin invalide: {candidate} existe mais ce n'est pas un dossier.")
                 continue
             candidate.mkdir(parents=True, exist_ok=True)
-            out_dir = candidate
-        except (OSError, ValueError) as e:
-            print(f"Chemin invalide: {e}")
-    
-#Lecture des données parquet, filtrage avec les codes saisis
+            return candidate
+        except (OSError, ValueError) as error:
+            print(f"Chemin invalide: {error}")
 
-    BASE_DIR = Path(__file__).resolve().parent
-    paths = LocalINPNPaths.default(BASE_DIR / "data")
+
+def main() -> None:
+    """Exécute le flux de lecture, filtrage et export Excel."""
+    codes_znieff, codes_n2000 = ask_codes()
+    project_name = ask_project_name()
+    output_dir = ask_output_directory()
+
+    base_dir = Path(__file__).resolve().parent
+    paths = LocalINPNPaths.default(base_dir / "data")
 
     print("Lecture / filtrage habitats ZNIEFF...")
     df_habitats_znieff = export_habitats_znieff(paths, codes_znieff)
@@ -91,18 +84,25 @@ def main():
     print("Lecture / filtrage espèces Natura 2000...")
     df_especes_n2000 = export_especes_n2000(paths, codes_n2000)
 
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_xlsx = out_dir / f"Bibliographie_{nom_projet}_{stamp}.xlsx"
-
-#Écriture du fichier Excel avec les données filtrées, gestion des erreurs et affichage du résultat
+    stamp = datetime.now().strftime("%d%m%Y")
+    out_xlsx = output_dir / f"Bibliographie_{project_name}_{stamp}.xlsx"
 
     try:
-        write_excel_output(out_xlsx, df_habitats_znieff, df_especes_znieff, df_habitats_n2000, df_especes_n2000)
-    except ValueError as e:
-        print(f"\n❌ {e}")
+        write_excel_output(
+            out_xlsx,
+            df_habitats_znieff,
+            df_especes_znieff,
+            df_habitats_n2000,
+            df_especes_n2000,
+        )
+    except ValueError as error:
+        print(f"\n❌ {error}")
         return
-    except Exception as e:
-        print(f"\n❌ Erreur lors de la création de l'Excel ({type(e).__name__}) : {e}")
+    except OSError as error:
+        print(
+            "\n❌ Erreur lors de la création de l'Excel "
+            f"({type(error).__name__}) : {error}"
+        )
         return
 
     print(f"\n✅ Excel généré : {out_xlsx}")
@@ -111,7 +111,11 @@ def main():
     print(f"   - HABITATS N2000 : {len(df_habitats_n2000)} lignes")
     print(f"   - ESPECES N2000 : {len(df_especes_n2000)} lignes")
 
-#Lancement du script
-
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:  # pylint: disable=broad-exception-caught
+        print(
+            "\n❌ Erreur inattendue "
+            f"({type(error).__name__}) : {error}"
+        )
