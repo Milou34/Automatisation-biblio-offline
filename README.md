@@ -31,7 +31,7 @@ Avant de commencer, assurez-vous de suivre les étapes suivantes :
 3. Lancez l'exécutable `v...-bibliographie-zonage`.
 4. A la première exécution du programme, cliquez sur `Informations complémentaires`, puis sur `Exécuter quand même`. 
 
-**Attention** : Un temps de latence est présent au lancement du programme, attendre quelques secondes avant l'apparition du premier input.
+⚠️ **Attention** : Un temps de latence est présent au lancement du programme, attendre quelques secondes avant l'apparition du premier input.
 
    Suivez les instructions qui s'affichent dans la console : 
 
@@ -58,7 +58,7 @@ Puis appuyer sur `Entrer`.
 
 9. Renseignez le chemin du dossier de destination où sera créé le Excel final.
 
-    **ATTENTION! Ce dossier ne doit pas se trouver sur le OneDrive** (Sinon vous aurez une erreur).\
+    ⚠️ **ATTENTION! Ce dossier ne doit pas se trouver sur le OneDrive** (Sinon vous aurez une erreur). ⚠️ \
     **Tips** : Ouvrez l'explorateur de fichiers puis allez dans :
     Ce PC > Windows (C:) > Utilisateurs > PrénomNOM > 
     Puis créez un dossier `Documents` à cet endroit (en local). Vous travaillerez TOUJOURS depuis ce dossier pour créer vos Excels de bibliographie.
