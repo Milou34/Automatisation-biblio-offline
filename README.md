@@ -16,9 +16,9 @@ Ce projet Python a pour objectif d'automatiser l'export des données espèces et
 ## Fonctionnalités
 
 - **Formatage des données** : Pipeline de récupération, préparation et formatage des données.
-- **Création de plusieurs feuilles de calcul et intégration des données** : Création et insertion des données formatées dans un excel lisible et renommé.
+- **Création de plusieurs feuilles de calcul et intégration des données** : Création et insertion des habitats et espèces ZNIEFF et habitats et espèces Natura 2000 dans des onglets distincts. Ces feuilles sont intégrées dans un excel lisible et renommé.
 - **Mise en forme du excel** : Ajustement de la taille des colonnes des tableau.
-- **Fonctionnement hors ligne** : Ce programme est prévu pour fonctionner en local sans besoin de ressources distantes. Les tableaux de données sont directement intégrées dans l'exécutable.
+- **Fonctionnement hors ligne** : Ce programme est prévu pour fonctionner en local sans besoin de ressources distantes. Les bases de données utilisées sont directement intégrées dans l'exécutable.
 - ***Sources des données*** : Les données sont issues de la page temporaire de téléchargement de Patrinat (dossiers ZNIEFF et Natura 2000) : https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353
 
 ## Utilisation
@@ -30,20 +30,12 @@ Avant de commencer, assurez-vous de suivre les étapes suivantes :
 2. Préalablement au lancement du programme, pour le ou les projets dont vous souhaitez créer la bibliographie, assurez vous d'avoir bien créé la couche `zonages_aires_detude` à l'aide du modèle Zonages sur QGIS. Dans la table attributaire de cette couche, vous pourrez retrouver les `codes ZNIEFF et Natura 2000` demandés par le programme.
 3. Lancez l'exécutable `v...-bibliographie-zonage`.
 4. A la première exécution du programme, cliquez sur `Informations complémentaires`, puis sur `Exécuter quand même`. 
-5. Suivez les instructions qui s'affichent dans la console : 
 
-    Renseignez le chemin du dossier de destination, où seront téléchargés les fichiers XML et où sera créé le Excel final.
+**Attention** : Un temps de latence est présent au lancement du programme, attendre quelques secondes avant l'apparition du premier input.
 
-    **ATTENTION! Ce dossier ne doit pas se trouver sur le OneDrive** (Sinon vous aurez une erreur).\
-    **Tips** : Ouvrez l'explorateur de fichiers puis allez dans :
-    Ce PC > Windows (C:) > Utilisateurs > PrénomNOM > 
-    Puis créez un dossier `Documents` à cet endroit (en local). Vous travaillerez TOUJOURS depuis ce dossier pour créer vos Excels de bibliographie.
+   Suivez les instructions qui s'affichent dans la console : 
 
-    A cette étape, vous pouvez donc copier/coller le chemin du dossier dans la console (clic droit sur le chemin en haut de la fenêtre, `copier l'adresse`) et écrire à la suite le nom du dossier à créer.\
-    Exemple : `C:\Users\PrénomNOM\Documents\106-Féricy-Bibliographie`\
-    Puis appuyer sur `Entrer`.
-
-6. Entrer les codes des ZNIEFFs de types 1 et 2 présentes dans l'AER, qui sont notés dans la colonne `ID_MNHN` de la couche `zonages_aires_detude` dans QGIS, en les séparant par une virgule.\
+5. Entrer les codes des ZNIEFFs de types 1 et 2 présentes dans l'AER, qui sont notés dans la colonne `ID_MNHN` de la couche `zonages_aires_detude` dans QGIS.\
 Puis appuyer sur `Entrer`.
 
     S'il n'y a pas de code ZNIEFF à renseigner, appuyer seulement sur `Entrer` et poursuivez le programme.
@@ -51,20 +43,33 @@ Puis appuyer sur `Entrer`.
     S'il y a une erreur sur l'un des codes (s'ils n'ont pas exactement 9 chiffres), les codes sont redemandés.\
     **Attention à bien renseigner uniquement des codes ZNIEFF.**
 
-7. Entrer les codes des zones Natura 2000 (les SIC et ZPS) présentes dans l'AEE, qui sont notés dans la colonne `SITE_CODE` de la couche `zonages_aires_detude` dans QGIS, en les séparant par une virgule.\
+6. Entrer les codes des zones Natura 2000 (les SIC et ZPS) présentes dans l'AEE, qui sont notés dans la colonne `SITE_CODE` de la couche `zonages_aires_detude` dans QGIS.\
 Puis appuyer sur `Entrer`.
 
     S'il n'y a pas de code Natura 2000 à renseigner, appuyer seulement sur `Entrer` et poursuivez le programme.
 
     S'il y a une erreur sur l'un des codes (s'ils ne commencent pas par FR suivi de 7 chiffres exactement), les codes sont redemandés.\
     **Attention à bien renseigner uniquement des codes Natura 2000.**
+   
+Il est necessaire de remplir au moins un code pour poursuivre le programme. En l'absence d'au moins un code, les input ZNIEFF et Natura 2000 seront redemandés.
 
-8. Entrer le numéro du projet, cela permettra de renommer automatiquement l'excel final en : `Bibliographie - n° projet`.\
+8. Entrer le nom du projet, cela permettra de renommer automatiquement l'excel final en : `Bibliographie + Nom du projet + Date`.\
 Puis appuyer sur `Entrer`.
 
-9. Le programme génère et ouvre l'excel final.
+9. Renseignez le chemin du dossier de destination où sera créé le Excel final.
 
-10. Si vous souhaitez poursuivre avec la bibliographie d'un autre projet, appuyez sur `Entrer`. Sinon, appuyez sur n'importe quelle autre touche pour quitter le programme.
+    **ATTENTION! Ce dossier ne doit pas se trouver sur le OneDrive** (Sinon vous aurez une erreur).\
+    **Tips** : Ouvrez l'explorateur de fichiers puis allez dans :
+    Ce PC > Windows (C:) > Utilisateurs > PrénomNOM > 
+    Puis créez un dossier `Documents` à cet endroit (en local). Vous travaillerez TOUJOURS depuis ce dossier pour créer vos Excels de bibliographie.
+
+    A cette étape, vous pouvez donc copier/coller le chemin du dossier dans la console (clic droit sur le chemin en haut de la fenêtre, `copier l'adresse`) et écrire à la suite le nom du dossier à créer si besoin.\
+    Exemple : `C:\Users\PrénomNOM\Documents\106-Féricy-Bibliographie`\
+    Puis appuyer sur `Entrer`.
+
+10. Le programme génère l'excel final dans le dossier demandé.
+
+11. Si vous souhaitez poursuivre avec la bibliographie d'un autre projet, appuyez sur `O`. Sinon, appuyez sur `N` pour quitter le programme.
 
 
 
