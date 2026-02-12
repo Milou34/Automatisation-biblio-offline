@@ -1,5 +1,7 @@
 """Traitements de filtrage/export ZNIEFF."""
 
+# pylint: disable=duplicate-code
+
 from typing import List, Sequence
 import pandas as pd
 
@@ -69,11 +71,23 @@ def load_znieff_info(paths: LocalINPNPaths) -> pd.DataFrame:
 
 
 def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.DataFrame:
+    # pylint: disable=too-many-locals
     """Exporte les habitats ZNIEFF filtrés par codes avec groupage et enrichissement."""
     # Schéma cible de sortie (ordre final des colonnes Excel)
     final_cols = [
-        "ID ZNIEFF", "Nom ZNIEFF", "Type ZNIEFF", "Type habitat", "CD_HAB", "Code typologie", "Libellé typologie",
-        "Code EUNIS", "Libellé EUNIS", "Code Corine", "Libellé Corine", "Code HIC", "Libellé HIC",
+        "ID ZNIEFF",
+        "Nom ZNIEFF",
+        "Type ZNIEFF",
+        "Type habitat",
+        "CD_HAB",
+        "Code typologie",
+        "Libellé typologie",
+        "Code EUNIS",
+        "Libellé EUNIS",
+        "Code Corine",
+        "Libellé Corine",
+        "Code HIC",
+        "Libellé HIC",
     ]
 
     # Sortie rapide si aucun code ZNIEFF valide à traiter
@@ -92,7 +106,15 @@ def export_habitats_znieff(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Da
         return pd.DataFrame(columns=final_cols)
 
     # On garantit la présence des colonnes attendues puis on normalise en texte
-    required_cols = ["NM_SFFZN", "CD_TYPO", "LB_TYPO", "CD_HAB", "LB_CODE", "LB_HAB", "ID_TYPO_INFO"]
+    required_cols = [
+        "NM_SFFZN",
+        "CD_TYPO",
+        "LB_TYPO",
+        "CD_HAB",
+        "LB_CODE",
+        "LB_HAB",
+        "ID_TYPO_INFO",
+    ]
     for col in required_cols:
         if col not in df.columns:
             df[col] = ""

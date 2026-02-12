@@ -1,5 +1,7 @@
 """Traitements de filtrage/export Natura 2000."""
 
+# pylint: disable=duplicate-code
+
 from typing import List, Sequence
 import pandas as pd
 
@@ -27,7 +29,8 @@ def parse_codes_n2000(raw: str) -> List[str]:
     for c in out:
         if not (c.startswith("FR") and len(c) == 9 and c[2:].isdigit()):
             raise ValueError(
-                f"Code N2000 invalide: '{c}'. Un code N2000 doit être composé de 'FR' suivi de 7 chiffres."
+                "Code N2000 invalide: "
+                f"'{c}'. Un code N2000 doit être composé de 'FR' suivi de 7 chiffres."
             )
 
     return out
@@ -172,7 +175,7 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
         "P": "Plantes",
         "R": "Reptiles",
     }
-    
+
     # Lire les deux tables d'espèces
     df_inscrites = pd.read_parquet(
         paths.n2000_especes_inscrites,
@@ -182,14 +185,14 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
         paths.n2000_especes_autres,
         columns=["sitecode", "cd_nom", "cd_ref", "taxgroup"]
     )
-    
+
     # Ajouter colonne "Type espèce"
     df_inscrites["Type espèce"] = "Espèce inscrite"
     df_autres["Type espèce"] = "Espèce autre"
-    
+
     # Concaténer les deux tables
     df = pd.concat([df_inscrites, df_autres], ignore_index=True)
-    
+
     # Normaliser et filtrer sur sitecode
     df["sitecode"] = df["sitecode"].astype(str).str.strip().str.upper()
     df = df[df["sitecode"].isin(code_set)]
@@ -201,17 +204,17 @@ def export_especes_n2000(paths: LocalINPNPaths, codes: Sequence[str]) -> pd.Data
     df["cd_nom"] = df["cd_nom"].astype(str).str.strip()
     df["cd_ref"] = df["cd_ref"].astype(str).str.strip()
     df["taxgroup"] = df["taxgroup"].astype(str).str.strip()
-    
+
     # Jointure avec TAXREF sur cd_nom -> CD_NOM
     ensure_exists(paths.taxref)
     tax = pd.read_parquet(paths.taxref, columns=["CD_NOM", "LB_NOM"])
     tax["CD_NOM"] = tax["CD_NOM"].astype(str).str.strip()
-    
+
     df = df.merge(tax, how="left", left_on="cd_nom", right_on="CD_NOM").drop(columns=["CD_NOM"])
-    
+
     # Mapper taxgroup aux libellés
     df["taxgroup"] = df["taxgroup"].map(taxgroup_map).fillna(df["taxgroup"])
-    
+
     # Jointure avec les infos N2000 normalisées
     df = df.merge(load_n2000_info(paths), how="left", on="sitecode")
 
