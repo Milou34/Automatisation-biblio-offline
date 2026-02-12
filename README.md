@@ -1,7 +1,7 @@
 # Automatisation-biblio
 
-<a href="https://github.com/Milou34/Automatisation-biblio/actions/workflows/build-executable-create-release.yml" target="_blank">![Build Status](https://github.com/Milou34/Automatisation-biblio/actions/workflows/build-executable-create-release.yml/badge.svg)</a>
-<a href="https://github.com/Milou34/Automatisation-biblio/actions/workflows/pylint.yml" target="_blank">![Code Quality](https://github.com/Milou34/Automatisation-biblio/actions/workflows/pylint.yml/badge.svg)</a>
+<a href="https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/build-executable-create-release.yml" target="_blank">![Build Status](https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/build-executable-create-release.yml/badge.svg)</a>
+<a href="https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/pylint.yml" target="_blank">![Code Quality](https://github.com/Milou34/Automatisation-biblio-offline/actions/workflows/pylint.yml/badge.svg)</a>
 <a href="https://github.com/Milou34/Automatisation-biblio/blob/main/LICENSE.txt" target="_blank">![Licence](https://img.shields.io/badge/Licence-Apache_2.0-blue.svg)</a>
 
 <a href="https://www.python.org/doc" target="_blank">![Python](https://img.shields.io/badge/Python-3.12-ffd343?logo=python)</a>
@@ -9,23 +9,24 @@
 <a href="https://pypi.org/project/requests" target="_blank">![Requests](https://img.shields.io/badge/Requests-2.32.3-ffd343?logo=pypi)</a>
 <a href="https://pypi.org/project/psutil" target="_blank">![Psutil](https://img.shields.io/badge/Psutil-6.0.0-ffd343?logo=pypi)</a>
 
-## Bibliographie Automatisée pour les Études Environnementales
+## Bibliographie automatisée pour des études environnementales
 
-Ce projet Python a pour objectif d'automatiser les tâches courantes de gestion de la bibliographie dans le cadre d'études environnementales. Il permet de centraliser la recherche, le formatage et l'organisation des sources, tout en facilitant l'intégration des références dans des feuilles de calcul.
+Ce projet Python a pour objectif d'automatiser l'export des données espèces et habitats ZNIEFF et Natura 2000 issues de la bibliographie, dans le cadre d'études environnementales. Il permet de centraliser la recherche, le formatage et l'organisation des sources, tout en facilitant l'intégration des références dans des feuilles de calcul.
 
 ## Fonctionnalités
 
-- **Téléchargment automatisée** : Recherche et téléchargement des données ZNIEFF et N2000 au format XML depuis le site de l'INPN
 - **Formatage des données** : Pipeline de récupération, préparation et formatage des données.
 - **Création de plusieurs feuilles de calcul et intégration des données** : Création et insertion des données formatées dans un excel lisible et renommé.
-- **Mise en forme du excel** : Formatage du style des cellules et des tableau.
+- **Mise en forme du excel** : Ajustement de la taille des colonnes des tableau.
+- **Fonctionnement hors ligne** : Ce programme est prévu pour fonctionner en local sans besoin de ressources distantes. Les tableaux de données sont directement intégrées dans l'exécutable.
+- ***Sources des données*** : Les données sont issues de la page temporaire de téléchargement de Patrinat (dossiers ZNIEFF et Natura 2000) : https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353
 
 ## Utilisation
 
 Avant de commencer, assurez-vous de suivre les étapes suivantes :
 
 
-1. Télécharger <a href="https://github.com/Milou34/Automatisation-biblio/releases/latest" target="_blank">l'executable</a> (cliquer sur le .exe)
+1. Télécharger <a href="https://github.com/Milou34/Automatisation-biblio-offline/releases/tag/v-888b2356e6ecbd58334fadaa67187b41a4499b87" target="_blank">l'executable</a> (cliquer sur le .exe)
 2. Préalablement au lancement du programme, pour le ou les projets dont vous souhaitez créer la bibliographie, assurez vous d'avoir bien créé la couche `zonages_aires_detude` à l'aide du modèle Zonages sur QGIS. Dans la table attributaire de cette couche, vous pourrez retrouver les `codes ZNIEFF et Natura 2000` demandés par le programme.
 3. Lancez l'exécutable `v...-bibliographie-zonage`.
 4. A la première exécution du programme, cliquez sur `Informations complémentaires`, puis sur `Exécuter quand même`. 
