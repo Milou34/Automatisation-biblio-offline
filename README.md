@@ -9,7 +9,7 @@
 <a href="https://pypi.org/project/pandas/" target="_blank">![Pandas](https://img.shields.io/badge/Pandas-3.0.0-ffd343?logo=pypi)</a>
 <a href="https://pypi.org/project/fastparquet/" target="_blank">![Fastparquet](https://img.shields.io/badge/Fastparquet-2025.12.0-ffd343?logo=pypi)</a>
 
-## Bibliographie automatisée pour des études environnementales
+## Bibliographie automatisée offline pour des études environnementales
 
 Ce projet Python a pour objectif d'automatiser l'export des données espèces et habitats ZNIEFF et Natura 2000 issues de la bibliographie, dans le cadre d'études environnementales. Il permet de centraliser la recherche, le formatage et l'organisation des sources, tout en facilitant l'intégration des références dans des feuilles de calcul.
 
