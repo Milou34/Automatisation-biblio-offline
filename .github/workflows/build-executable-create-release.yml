@@ -47,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: "v-${{ github.sha }}"
-          release_name: "Release v-1-3-${{ github.run_number }}"
+          release_name: "Release v-1-0-${{ github.run_number }}"
           draft: false
           prerelease: false
 
