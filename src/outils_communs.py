@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence, Union
+from typing import Sequence
 import pandas as pd
 from openpyxl import load_workbook
 
@@ -20,7 +20,7 @@ class LocalINPNPaths:
     habref_70: Path
 
     @staticmethod
-    def default(parquet_dir: Path | str = "data/parquet") -> "LocalINPNPaths":
+    def default(parquet_dir: Path | str = "data") -> "LocalINPNPaths":
         pdir = Path(parquet_dir)
         return LocalINPNPaths(
             parquet_dir=pdir,
@@ -62,59 +62,6 @@ def filter_parquet(
 
     df = df[df[key_col].isin(code_set)]
     return df
-
-
-def convert_csv_vers_parquet(
-    raw_dir: Union[str, Path] = r"C:\Users\MarylouBERTIN\Documents\Automatisation biblio\Automatisation biblio - CSV\data\raw_csv",
-    parquet_dir: Union[str, Path] = r"C:\Users\MarylouBERTIN\Documents\Automatisation biblio\Automatisation biblio - CSV\data\parquet",
-    sep: str = ";",
-    encoding: str = "utf-8",
-    engine: str = "pyarrow",
-    compression: str = "snappy",
-    force: bool = False,
-):
-    """Convertit tous les CSV de `raw_dir` vers des fichiers parquet dans `parquet_dir`.
-
-    Si un fichier parquet existe déjà (même nom stem), il est ignoré sauf si `force=True`.
-    """
-
-    RAW_DIR = Path(raw_dir)
-    PARQUET_DIR = Path(parquet_dir)
-
-    PARQUET_DIR.mkdir(parents=True, exist_ok=True)
-
-    for csv_file in RAW_DIR.glob("*.csv"):
-        parquet_path = PARQUET_DIR / (csv_file.stem + ".parquet")
-
-        if parquet_path.exists() and not force:
-            print(f"Ignoré (existe): {csv_file.name} → {parquet_path.name}")
-            continue
-
-        print(f"Conversion de {csv_file.name}...")
-
-        try:
-            df = pd.read_csv(
-                csv_file,
-                sep=sep,
-                encoding=encoding,
-                dtype=str,
-                low_memory=False,
-            )
-
-            df.to_parquet(
-                parquet_path,
-                index=False,
-                engine=engine,
-                compression=compression,
-            )
-
-            print(f"✔ → {parquet_path.name}")
-
-        except Exception as e:
-            print(f"❌ Erreur sur {csv_file.name}: {e}")
-
-    print("\nConversion terminée.")
-
 
 def write_excel_output(
     out_xlsx: Path,
