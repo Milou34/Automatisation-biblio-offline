@@ -23,29 +23,30 @@ from src.n2000 import (
 
 def main():
 
-#Input ZNIEFF
+#Input ZNIEFF + N2000
 
     while True:
-        raw_znieff = input("Codes ZNIEFF séparés par ; ou , :\n")
-        try:
-            codes = parse_codes_znieff(raw_znieff)
-            break
-        except ValueError as e:
-            print(f"Erreur: {e}")
-            
-#Input N2000
+        while True:
+            raw_znieff = input("Codes ZNIEFF séparés par ; ou , :\n")
+            try:
+                codes_znieff = parse_codes_znieff(raw_znieff)
+                break
+            except ValueError as e:
+                print(f"Erreur: {e}")
 
-    while True:
-        raw_n2000 = input("Codes Natura 2000 séparés par ; ou , :\n")
-        try:
-            codes_n2000 = parse_codes_n2000(raw_n2000)
-            break
-        except ValueError as e:
-            print(f"Erreur: {e}")
-            
-    if not codes and not codes_n2000:
-        print("Aucun code ZNIEFF ou N2000 fourni, arrêt.")
-        return        
+        while True:
+            raw_n2000 = input("Codes Natura 2000 séparés par ; ou , :\n")
+            try:
+                codes_n2000 = parse_codes_n2000(raw_n2000)
+                break
+            except ValueError as e:
+                print(f"Erreur: {e}")
+
+        if not codes_znieff and not codes_n2000:
+            print("Aucun code ZNIEFF ou N2000 fourni. Merci de saisir au moins un code.")
+            continue
+
+        break
     
 #Input nom du projet
 
@@ -79,10 +80,10 @@ def main():
     paths = LocalINPNPaths.default(BASE_DIR / "data")
 
     print("Lecture / filtrage habitats ZNIEFF...")
-    df_habitats_znieff = export_habitats_znieff(paths, codes)
+    df_habitats_znieff = export_habitats_znieff(paths, codes_znieff)
 
     print("Lecture / filtrage espèces ZNIEFF...")
-    df_especes_znieff = export_especes_znieff(paths, codes)
+    df_especes_znieff = export_especes_znieff(paths, codes_znieff)
 
     print("Lecture / filtrage habitats Natura 2000...")
     df_habitats_n2000 = export_habitats_n2000(paths, codes_n2000)
