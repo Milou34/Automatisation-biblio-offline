@@ -1,7 +1,5 @@
 """Traitements de filtrage/export ZNIEFF."""
 
-# pylint: disable=import-error
-
 from typing import List, Sequence
 import pandas as pd
 

@@ -1,7 +1,5 @@
 """Utilitaires partagés (chemins, lecture parquet, export Excel)."""
 
-# pylint: disable=import-error
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence

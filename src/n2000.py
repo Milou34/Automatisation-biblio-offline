@@ -1,7 +1,5 @@
 """Traitements de filtrage/export Natura 2000."""
 
-# pylint: disable=import-error
-
 from typing import List, Sequence
 import pandas as pd
 
