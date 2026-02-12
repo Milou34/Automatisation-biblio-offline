@@ -7,7 +7,6 @@ from openpyxl import load_workbook
 
 @dataclass(frozen=True)
 class LocalINPNPaths:
-    parquet_dir: Path
     znieff_espece: Path
     znieff_habitats: Path
     znieff_habitats_info: Path
@@ -20,10 +19,9 @@ class LocalINPNPaths:
     habref_70: Path
 
     @staticmethod
-    def default(parquet_dir: Path | str = "data") -> "LocalINPNPaths":
-        pdir = Path(parquet_dir)
+    def default(data_dir: Path | str = "data") -> "LocalINPNPaths":
+        pdir = Path(data_dir)
         return LocalINPNPaths(
-            parquet_dir=pdir,
             znieff_espece=pdir / "ZNIEFF_Especes.parquet",
             znieff_habitats=pdir / "ZNIEFF_Habitats.parquet",
             znieff_habitats_info=pdir / "ZNIEFF_Habitats_infos.parquet",
@@ -65,27 +63,53 @@ def filter_parquet(
 
 def write_excel_output(
     out_xlsx: Path,
-    df_habitats_znieff: pd.DataFrame,
-    df_especes_znieff: pd.DataFrame,
-    df_habitats_n2000: pd.DataFrame = None,
-    df_especes_n2000: pd.DataFrame = None,
+    df_habitats_znieff: pd.DataFrame | None = None,
+    df_especes_znieff: pd.DataFrame | None = None,
+    df_habitats_n2000: pd.DataFrame | None = None,
+    df_especes_n2000: pd.DataFrame | None = None,
     sheet_habitats_znieff: str = "Habitats ZNIEFF",
     sheet_especes_znieff: str = "Espèces ZNIEFF",
     sheet_habitats_n2000: str = "Habitats N2000",
     sheet_especes_n2000: str = "Espèces N2000",
 ) -> Path:
-    """Écrit les dataframes dans un fichier Excel avec plusieurs onglets et ajuste la largeur des colonnes."""
-    
-    # Convertir les None en DataFrames vides
-    if df_habitats_n2000 is None:
-        df_habitats_n2000 = pd.DataFrame()
-    if df_especes_n2000 is None:
-        df_especes_n2000 = pd.DataFrame()
-    
-    # Vérifier si aucune donnée n'a été trouvée
-    if (df_habitats_znieff.empty and df_especes_znieff.empty and 
-        df_habitats_n2000.empty and df_especes_n2000.empty):
-        raise ValueError("Aucune donnée trouvée pour les codes saisis")
+    """Écrit les dataframes (même vides) dans un fichier Excel avec plusieurs onglets et ajuste la largeur des colonnes."""
+
+    znieff_habitats_cols = [
+        "ID ZNIEFF", "Nom ZNIEFF", "Type ZNIEFF", "Type habitat", "CD_HAB", "Code typologie", "Libellé typologie",
+        "Code EUNIS", "Libellé EUNIS", "Code Corine", "Libellé Corine", "Code HIC", "Libellé HIC",
+    ]
+    znieff_especes_cols = [
+        "ID ZNIEFF", "Nom ZNIEFF", "Type ZNIEFF", "Groupe taxonomique", "Nom scientifique", "CD_REF", "CD_NOM", "Type espèce",
+    ]
+    n2000_habitats_cols = [
+        "ID N2000", "Nom site", "Type de zone", "Code HIC", "Libellé HIC", "Forme prioritaire", "CD_HAB",
+    ]
+    n2000_especes_cols = [
+        "ID N2000", "Nom site", "Type de zone", "Groupe taxonomique", "Nom scientifique", "CD_NOM", "CD_REF", "Type espèce",
+    ]
+
+    def ensure_headers(df: pd.DataFrame | None, expected_cols: list[str]) -> pd.DataFrame:
+        """Garantit la présence des en-têtes attendus.
+
+        - Si `df` est `None`, renvoie un DataFrame vide avec les colonnes attendues.
+        - Si `df` existe, ajoute les colonnes manquantes (valeur vide) puis
+          réordonne les colonnes attendues en premier.
+        """
+        if df is None:
+            return pd.DataFrame(columns=expected_cols)
+
+        out_df = df.copy()
+        for col in expected_cols:
+            if col not in out_df.columns:
+                out_df[col] = ""
+
+        extra_cols = [c for c in out_df.columns if c not in expected_cols]
+        return out_df[expected_cols + extra_cols]
+
+    df_habitats_znieff = ensure_headers(df_habitats_znieff, znieff_habitats_cols)
+    df_especes_znieff = ensure_headers(df_especes_znieff, znieff_especes_cols)
+    df_habitats_n2000 = ensure_headers(df_habitats_n2000, n2000_habitats_cols)
+    df_especes_n2000 = ensure_headers(df_especes_n2000, n2000_especes_cols)
     
     out_xlsx.parent.mkdir(parents=True, exist_ok=True)
 
