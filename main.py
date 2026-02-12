@@ -5,7 +5,6 @@ from datetime import datetime
 
 from src.outils_communs import (
     LocalINPNPaths,
-    convert_csv_vers_parquet,
     write_excel_output,
 )
 from src.znieff import (
@@ -42,14 +41,7 @@ def main():
         return
 
     BASE_DIR = Path(__file__).resolve().parent
-    # Vérifie si les fichiers CSV sont convertis en parquet
-    convert_csv_vers_parquet(
-        raw_dir=BASE_DIR / "data" / "raw_csv",
-        parquet_dir=BASE_DIR / "data" / "parquet",
-        force=False,
-    )
-
-    paths = LocalINPNPaths.default(BASE_DIR / "data" / "parquet")
+    paths = LocalINPNPaths.default(BASE_DIR / "data")
 
     print("Lecture / filtrage habitats ZNIEFF...")
     df_habitats_znieff = export_habitats_znieff(paths, codes)
