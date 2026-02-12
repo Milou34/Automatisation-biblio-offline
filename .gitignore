@@ -5,5 +5,3 @@ __pycache__/
 /build
 *.spec
 /.vscode
-data/raw_csv/
-/output

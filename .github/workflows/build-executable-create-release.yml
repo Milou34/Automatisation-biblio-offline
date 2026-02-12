@@ -37,7 +37,7 @@ jobs:
       # Build the executable
       - name: Build executable with PyInstaller
         run: |
-          pyinstaller --onefile --icon favicon.ico --name v-1-3-${{ github.run_number }}-bibliographie-zonage --add-data "data\parquet\*.parquet;data\parquet" main.py
+          pyinstaller --onefile --icon favicon.ico --name v-1-3-${{ github.run_number }}-bibliographie-zonage --add-data "data\*.parquet;data" main.py
       
       # Create GitHub Release
       - name: Create GitHub Release
