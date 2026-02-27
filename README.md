@@ -71,9 +71,15 @@ Puis appuyer sur `Entrer`.
 
 11. Si vous souhaitez poursuivre avec la bibliographie d'un autre projet, appuyez sur `O`. Sinon, appuyez sur `N` pour quitter le programme.
 
-Le programme utilise les données issues de la page temporaire de téléchargement de [PatriNat](https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353) (référentiels de données gérés dans le cadre de l’INPN). Ces données proviennent de fichiers `.csv` contenus dans les archives `.zip` des référentiels **ZNIEFF BDD.zip** et **NATURA 2000.zip**. 
+## Source et structure des données
 
-Avant d’être utilisées par le programme, ces fichiers `.csv` sont convertis en fichiers `.parquet`. Si, ultérieurement, de nouveaux `.csv` doivent être intégrés à cause d’une mise à jour des sources, il faudra réaliser à nouveau la conversion des fichiers nécessaires en `.parquet` et les remplacer dans le dossier `data`. Lors de cette opération, veille à conserver **les mêmes noms de fichiers** (ou à adapter les noms dans le code du programme si nécessaire).
+Le programme utilise les données issues de la page temporaire de téléchargement de [PatriNat](https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353). Ces données proviennent de fichiers `.csv` contenus dans les archives `.zip` des référentiels **ZNIEFF BDD.zip** et **NATURA 2000.zip**. 
+
+Avant d’être utilisées par le programme, les données issues des fichiers `.csv` sont converties en fichiers `.parquet`. Compte tenu du volume des tableaux de données et des traitements automatisés réalisés, le traitement direct des fichiers `.csv` n’était techniquement pas envisageable : leurs temps de lecture, de filtrage et de jointure étaient incompatibles avec le fonctionnement du programme.
+
+Le format `.parquet`, grâce à sa structure colonnaire et compressée, permet des temps de calcul nettement plus rapides, une meilleure gestion des types de données et une réduction significative de la taille des fichiers, rendant ainsi les traitements fiables et reproductibles.
+
+Si, ultérieurement, de nouveaux `.csv` doivent être intégrés à cause d’une mise à jour des sources, il faudra réaliser à nouveau la conversion des fichiers nécessaires en `.parquet` et les remplacer dans le dossier `data`. Lors de cette opération, veillez à conserver **les mêmes noms de fichiers** (ou à adapter les noms dans le code du programme si nécessaire).
 
 ## Structure du Projet
 
